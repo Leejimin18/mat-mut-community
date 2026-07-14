@@ -55,7 +55,7 @@ export default function HomePage() {
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
                 🍽️ 음식 종류
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {categories.map((category) => (
                   <Chip
                     key={category.category_id}
@@ -66,6 +66,8 @@ export default function HomePage() {
                       fontWeight: 700,
                       borderRadius: 999,
                       px: 0.5,
+                      width: '100%',
+                      justifyContent: 'flex-start',
                       '&:hover': { bgcolor: 'primary.main', color: 'primary.contrastText' },
                     }}
                   />
