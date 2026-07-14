@@ -6,6 +6,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import StarRating from '../ui/star-rating';
+import { getCategoryColor } from '../../utils/category-color';
 
 const FALLBACK_IMAGE = 'https://placehold.co/400x300/FFD43B/FF7A30?text=Mat_Mut';
 
@@ -30,7 +31,16 @@ export default function PostCard({ post }) {
         <CardMedia component="img" image={thumbnailUrl} alt={post.store_name} sx={{ height: 180, objectFit: 'cover' }} />
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 0.5, flexGrow: 1 }}>
           {post.mm_categories?.name && (
-            <Chip label={post.mm_categories.name} size="small" color="secondary" sx={{ alignSelf: 'flex-start', fontWeight: 700 }} />
+            <Chip
+              label={post.mm_categories.name}
+              size="small"
+              sx={{
+                alignSelf: 'flex-start',
+                fontWeight: 700,
+                bgcolor: getCategoryColor(post.mm_categories.name).bg,
+                color: getCategoryColor(post.mm_categories.name).text,
+              }}
+            />
           )}
           <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 0.5 }}>
             {post.store_name}

@@ -12,6 +12,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { supabase } from '../lib/supabase';
 import PostCard from '../components/community/post-card';
 import { getCategoryEmoji } from '../utils/category-emoji';
+import { getCategoryColor } from '../utils/category-color';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -50,24 +51,23 @@ export default function HomePage() {
     <Box sx={{ width: '100%', flexGrow: 1, py: { xs: 2, md: 4 } }}>
       <Container maxWidth="lg">
         <Grid container spacing={{ xs: 2, md: 3 }}>
-          <Grid size={{ xs: 12, md: 3 }}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
                 🍽️ 음식 종류
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 }}>
                 {categories.map((category) => (
                   <Chip
                     key={category.category_id}
                     label={`${getCategoryEmoji(category.name)} ${category.name}`}
                     onClick={() => navigate(`/posts?category=${category.category_id}`)}
-                    color="secondary"
                     sx={{
                       fontWeight: 700,
                       borderRadius: 999,
                       px: 0.5,
-                      width: '100%',
-                      justifyContent: 'flex-start',
+                      bgcolor: getCategoryColor(category.name).bg,
+                      color: getCategoryColor(category.name).text,
                       '&:hover': { bgcolor: 'primary.main', color: 'primary.contrastText' },
                     }}
                   />
@@ -91,7 +91,7 @@ export default function HomePage() {
             </Paper>
           </Grid>
 
-          <Grid size={{ xs: 12, md: 9 }}>
+          <Grid size={{ xs: 12, md: 10 }}>
             <Typography variant="h5" sx={{ fontWeight: 800, mb: { xs: 2, md: 3 } }}>
               🔥 지금 인기있는 맛집
             </Typography>
