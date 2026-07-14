@@ -4,9 +4,11 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
+import Grid from '@mui/material/Grid';
 import CircularProgress from '@mui/material/CircularProgress';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
@@ -14,14 +16,22 @@ import IconButton from '@mui/material/IconButton';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/use-auth';
 import { uploadPostImages } from '../utils/upload-post-images';
+import StarRating from '../components/ui/star-rating';
 
 export default function PostEditPage() {
   const { postId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const [categories, setCategories] = useState([]);
   const [title, setTitle] = useState('');
+  const [storeName, setStoreName] = useState('');
+  const [location, setLocation] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [mainIngredient, setMainIngredient] = useState('');
+  const [price, setPrice] = useState('');
   const [content, setContent] = useState('');
+  const [authorRating, setAuthorRating] = useState(5);
   const [existingImages, setExistingImages] = useState([]);
   const [newImageFiles, setNewImageFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,18 +40,24 @@ export default function PostEditPage() {
 
   useEffect(() => {
     const loadPost = async () => {
-      const { data: post } = await supabase.from('mm_posts').select('*').eq('post_id', postId).single();
-      const { data: images } = await supabase
-        .from('mm_post_images')
-        .select('*')
-        .eq('post_id', postId)
-        .order('sort_order');
+      const [{ data: post }, { data: images }, { data: categoriesData }] = await Promise.all([
+        supabase.from('mm_posts').select('*').eq('post_id', postId).single(),
+        supabase.from('mm_post_images').select('*').eq('post_id', postId).order('sort_order'),
+        supabase.from('mm_categories').select('*').order('category_id'),
+      ]);
 
       if (post) {
         setTitle(post.title);
+        setStoreName(post.store_name);
+        setLocation(post.location ?? '');
+        setCategoryId(post.category_id ?? '');
+        setMainIngredient(post.main_ingredient ?? '');
+        setPrice(post.price ?? '');
         setContent(post.content ?? '');
+        setAuthorRating(post.author_rating ?? 5);
       }
       setExistingImages(images ?? []);
+      setCategories(categoriesData ?? []);
       setIsLoading(false);
     };
 
@@ -61,7 +77,17 @@ export default function PostEditPage() {
     try {
       const { error: updateError } = await supabase
         .from('mm_posts')
-        .update({ title, content, updated_at: new Date().toISOString() })
+        .update({
+          title,
+          store_name: storeName,
+          location,
+          category_id: categoryId || null,
+          main_ingredient: mainIngredient,
+          price: price ? Number(price) : null,
+          content,
+          author_rating: authorRating,
+          updated_at: new Date().toISOString(),
+        })
         .eq('post_id', postId)
         .eq('user_id', user.id);
 
@@ -111,6 +137,48 @@ export default function PostEditPage() {
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField label="제목" value={title} onChange={(event) => setTitle(event.target.value)} required fullWidth />
+
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label="가게 상호명"
+                  value={storeName}
+                  onChange={(event) => setStoreName(event.target.value)}
+                  required
+                  fullWidth
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField label="가게 위치" value={location} onChange={(event) => setLocation(event.target.value)} required fullWidth />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField select label="음식 종류" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} fullWidth>
+                  {categories.map((category) => (
+                    <MenuItem key={category.category_id} value={category.category_id}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label="음식 주재료"
+                  value={mainIngredient}
+                  onChange={(event) => setMainIngredient(event.target.value)}
+                  fullWidth
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label="가격"
+                  type="number"
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
+                  fullWidth
+                />
+              </Grid>
+            </Grid>
+
             <TextField
               label="상세 내용"
               value={content}
@@ -153,6 +221,11 @@ export default function PostEditPage() {
                 새로 추가할 이미지 {newImageFiles.length}장
               </Typography>
             )}
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2">내 평점</Typography>
+              <StarRating value={authorRating} onChange={setAuthorRating} isReadOnly={false} />
+            </Box>
 
             <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
               수정 완료

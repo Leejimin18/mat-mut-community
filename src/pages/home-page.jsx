@@ -5,13 +5,13 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
+import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import { supabase } from '../lib/supabase';
 import PostCard from '../components/community/post-card';
+import { getCategoryEmoji } from '../utils/category-emoji';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -52,20 +52,25 @@ export default function HomePage() {
         <Grid container spacing={{ xs: 2, md: 3 }}>
           <Grid size={{ xs: 12, md: 3 }}>
             <Paper sx={{ p: 2 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
-                음식 종류
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+                🍽️ 음식 종류
               </Typography>
-              <List dense disablePadding>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                 {categories.map((category) => (
-                  <ListItemButton
+                  <Chip
                     key={category.category_id}
+                    label={`${getCategoryEmoji(category.name)} ${category.name}`}
                     onClick={() => navigate(`/posts?category=${category.category_id}`)}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    {category.name}
-                  </ListItemButton>
+                    color="secondary"
+                    sx={{
+                      fontWeight: 700,
+                      borderRadius: 999,
+                      px: 0.5,
+                      '&:hover': { bgcolor: 'primary.main', color: 'primary.contrastText' },
+                    }}
+                  />
                 ))}
-              </List>
+              </Box>
 
               <Divider sx={{ my: 2 }} />
 
