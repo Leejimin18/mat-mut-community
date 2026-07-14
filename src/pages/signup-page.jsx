@@ -10,7 +10,8 @@ import Alert from '@mui/material/Alert';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { useAuth } from '../hooks/use-auth';
-import { supabase } from '../lib/supabase';
+
+const DUPLICATE_EMAIL_ERROR_PATTERN = /already registered|already exists|already been registered/i;
 
 export default function SignupPage() {
   const { signUp } = useAuth();
@@ -21,28 +22,8 @@ export default function SignupPage() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [nickname, setNickname] = useState('');
   const [isAgreed, setIsAgreed] = useState(false);
-  const [emailCheckMessage, setEmailCheckMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleCheckEmailDuplicate = async () => {
-    setEmailCheckMessage('');
-    if (!email) {
-      setEmailCheckMessage('이메일을 입력해주세요.');
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
-    });
-
-    if (error) {
-      setEmailCheckMessage('사용 가능한 이메일입니다.');
-    } else {
-      setEmailCheckMessage('이미 가입된 이메일입니다.');
-    }
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -62,7 +43,9 @@ export default function SignupPage() {
     setIsSubmitting(false);
 
     if (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        DUPLICATE_EMAIL_ERROR_PATTERN.test(error.message) ? '이미 가입된 이메일입니다.' : error.message,
+      );
       return;
     }
     navigate('/login');
@@ -83,24 +66,14 @@ export default function SignupPage() {
           )}
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-              <TextField
-                label="이메일"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                fullWidth
-              />
-              <Button variant="outlined" onClick={handleCheckEmailDuplicate} sx={{ whiteSpace: 'nowrap', mt: 1 }}>
-                중복 검사
-              </Button>
-            </Box>
-            {emailCheckMessage && (
-              <Typography variant="body2" sx={{ mt: -1, color: 'text.secondary' }}>
-                {emailCheckMessage}
-              </Typography>
-            )}
+            <TextField
+              label="이메일"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              fullWidth
+            />
 
             <TextField
               label="닉네임"
