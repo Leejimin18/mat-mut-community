@@ -9,6 +9,7 @@ import PostListPage from './pages/post-list-page';
 import PostDetailPage from './pages/post-detail-page';
 import PostWritePage from './pages/post-write-page';
 import PostEditPage from './pages/post-edit-page';
+import MyPage from './pages/my-page';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               <Route path="/posts/new" element={<PostWritePage />} />
               <Route path="/posts/:postId" element={<PostDetailPage />} />
               <Route path="/posts/:postId/edit" element={<PostEditPage />} />
+              <Route path="/mypage" element={<MyPage />} />
             </Routes>
           </Box>
         </Box>

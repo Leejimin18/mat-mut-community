@@ -64,9 +64,9 @@ export default function Header() {
           </Button>
           {user ? (
             <>
-              <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              <Button component={Link} to="/mypage" color="inherit">
                 {profile?.nickname ?? ''}님
-              </Typography>
+              </Button>
               <Button component={Link} to="/posts/new" variant="contained" color="primary">
                 글쓰기
               </Button>

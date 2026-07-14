@@ -16,6 +16,7 @@ import { formatDate } from '../utils/format-date';
 import StarRating from '../components/ui/star-rating';
 import CommentForm from '../components/community/comment-form';
 import CommentList from '../components/community/comment-list';
+import FavoriteButton from '../components/community/favorite-button';
 
 export default function PostDetailPage() {
   const { postId } = useParams();
@@ -61,6 +62,11 @@ export default function PostDetailPage() {
 
     loadPost();
   }, [postId, loadComments]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('mm_post_views').insert({ post_id: postId, user_id: user.id });
+  }, [postId, user]);
 
   const handleAddComment = async (content, rating) => {
     await supabase.from('mm_comments').insert({
@@ -142,16 +148,19 @@ export default function PostDetailPage() {
             {post.content}
           </Typography>
 
-          {isOwner && (
-            <Box sx={{ display: 'flex', gap: 1, mt: 3 }}>
-              <Button component={Link} to={`/posts/${postId}/edit`} variant="outlined">
-                수정
-              </Button>
-              <Button onClick={handleDeletePost} color="error" variant="outlined">
-                삭제
-              </Button>
-            </Box>
-          )}
+          <Box sx={{ display: 'flex', gap: 1, mt: 3, flexWrap: 'wrap' }}>
+            {user && <FavoriteButton postId={Number(postId)} userId={user.id} />}
+            {isOwner && (
+              <>
+                <Button component={Link} to={`/posts/${postId}/edit`} variant="outlined">
+                  수정
+                </Button>
+                <Button onClick={handleDeletePost} color="error" variant="outlined">
+                  삭제
+                </Button>
+              </>
+            )}
+          </Box>
 
           <Divider sx={{ my: 3 }} />
 
