@@ -12,7 +12,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { supabase } from '../lib/supabase';
 import PostCard from '../components/community/post-card';
 import { getCategoryEmoji } from '../utils/category-emoji';
-import { getCategoryColor } from '../utils/category-color';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -57,7 +56,7 @@ export default function HomePage() {
                 🍽️ 음식 종류
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 }}>
-                {categories.map((category) => (
+                {categories.map((category, index) => (
                   <Chip
                     key={category.category_id}
                     label={`${getCategoryEmoji(category.name)} ${category.name}`}
@@ -66,8 +65,7 @@ export default function HomePage() {
                       fontWeight: 700,
                       borderRadius: 999,
                       px: 0.5,
-                      bgcolor: getCategoryColor(category.name).bg,
-                      color: getCategoryColor(category.name).text,
+                      bgcolor: index % 2 === 0 ? 'secondary.main' : 'success.light',
                       '&:hover': { bgcolor: 'primary.main', color: 'primary.contrastText' },
                     }}
                   />
