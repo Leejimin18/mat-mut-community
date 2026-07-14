@@ -10,11 +10,12 @@ import StarRating from '../ui/star-rating';
  *
  * Props:
  * @param {function} onSubmit - 댓글 등록 시 실행할 함수 (content, rating) [Required]
+ * @param {boolean} isReply - 답글 작성 모드 여부 (평점 입력 숨김) [Optional, 기본값: false]
  *
  * Example usage:
  * <CommentForm onSubmit={handleAddComment} />
  */
-export default function CommentForm({ onSubmit }) {
+export default function CommentForm({ onSubmit, isReply = false }) {
   const [content, setContent] = useState('');
   const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,7 +25,7 @@ export default function CommentForm({ onSubmit }) {
     if (!content.trim()) return;
 
     setIsSubmitting(true);
-    await onSubmit(content, rating);
+    await onSubmit(content, isReply ? null : rating);
     setIsSubmitting(false);
     setContent('');
     setRating(5);
@@ -32,15 +33,17 @@ export default function CommentForm({ onSubmit }) {
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Typography variant="body2">평점</Typography>
-        <StarRating value={rating} onChange={setRating} isReadOnly={false} />
-      </Box>
+      {!isReply && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2">평점</Typography>
+          <StarRating value={rating} onChange={setRating} isReadOnly={false} />
+        </Box>
+      )}
       <Box sx={{ display: 'flex', gap: 1 }}>
         <TextField
           size="small"
           fullWidth
-          placeholder="댓글을 남겨보세요"
+          placeholder={isReply ? '답글을 남겨보세요' : '댓글을 남겨보세요'}
           value={content}
           onChange={(event) => setContent(event.target.value)}
         />

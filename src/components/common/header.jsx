@@ -64,6 +64,11 @@ export default function Header() {
           </Button>
           {user ? (
             <>
+              {profile?.role === 'admin' && (
+                <Button component={Link} to="/admin" color="inherit">
+                  관리자
+                </Button>
+              )}
               <Button component={Link} to="/mypage" color="inherit">
                 {profile?.nickname ?? ''}님
               </Button>

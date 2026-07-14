@@ -17,6 +17,7 @@ import StarRating from '../components/ui/star-rating';
 import CommentForm from '../components/community/comment-form';
 import CommentList from '../components/community/comment-list';
 import FavoriteButton from '../components/community/favorite-button';
+import ReportDialog from '../components/community/report-dialog';
 
 export default function PostDetailPage() {
   const { postId } = useParams();
@@ -26,7 +27,9 @@ export default function PostDetailPage() {
   const [post, setPost] = useState(null);
   const [images, setImages] = useState([]);
   const [comments, setComments] = useState([]);
+  const [likedCommentIds, setLikedCommentIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [isPostReportOpen, setIsPostReportOpen] = useState(false);
 
   const loadComments = useCallback(async () => {
     const { data } = await supabase
@@ -36,7 +39,16 @@ export default function PostDetailPage() {
       .order('is_pinned', { ascending: false })
       .order('created_at', { ascending: false });
     setComments(data ?? []);
-  }, [postId]);
+
+    if (user) {
+      const { data: likeRows } = await supabase
+        .from('mm_comment_likes')
+        .select('comment_id')
+        .eq('user_id', user.id)
+        .in('comment_id', (data ?? []).map((comment) => comment.comment_id));
+      setLikedCommentIds(new Set((likeRows ?? []).map((row) => row.comment_id)));
+    }
+  }, [postId, user]);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -61,7 +73,8 @@ export default function PostDetailPage() {
     };
 
     loadPost();
-  }, [postId, loadComments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postId]);
 
   useEffect(() => {
     if (!user) return;
@@ -76,6 +89,50 @@ export default function PostDetailPage() {
       rating,
     });
     await loadComments();
+  };
+
+  const handleReplyComment = async (parentCommentId, content) => {
+    await supabase.from('mm_comments').insert({
+      post_id: postId,
+      user_id: user.id,
+      parent_comment_id: parentCommentId,
+      content,
+      rating: null,
+    });
+    await loadComments();
+  };
+
+  const handleToggleLike = async (commentId, isLiked) => {
+    if (!user) return;
+    if (isLiked) {
+      await supabase.from('mm_comment_likes').delete().eq('comment_id', commentId).eq('user_id', user.id);
+    } else {
+      await supabase.from('mm_comment_likes').insert({ comment_id: commentId, user_id: user.id });
+    }
+    await loadComments();
+  };
+
+  const handleTogglePin = async (commentId, isPinned) => {
+    await supabase.from('mm_comments').update({ is_pinned: !isPinned }).eq('comment_id', commentId);
+    await loadComments();
+  };
+
+  const handleReportComment = async (commentId, reason) => {
+    await supabase.from('mm_reports').insert({
+      reporter_id: user.id,
+      target_type: 'comment',
+      target_id: commentId,
+      reason,
+    });
+  };
+
+  const handleReportPost = async (reason) => {
+    await supabase.from('mm_reports').insert({
+      reporter_id: user.id,
+      target_type: 'post',
+      target_id: postId,
+      reason,
+    });
   };
 
   const handleDeleteComment = async (commentId) => {
@@ -160,6 +217,11 @@ export default function PostDetailPage() {
                 </Button>
               </>
             )}
+            {user && !isOwner && (
+              <Button color="warning" variant="outlined" onClick={() => setIsPostReportOpen(true)}>
+                신고
+              </Button>
+            )}
           </Box>
 
           <Divider sx={{ my: 3 }} />
@@ -178,8 +240,24 @@ export default function PostDetailPage() {
             </Typography>
           )}
 
-          <CommentList comments={comments} currentUserId={user?.id} onDelete={handleDeleteComment} />
+          <CommentList
+            comments={comments}
+            currentUserId={user?.id}
+            isPostOwner={isOwner}
+            likedCommentIds={likedCommentIds}
+            onDelete={handleDeleteComment}
+            onReply={handleReplyComment}
+            onToggleLike={handleToggleLike}
+            onTogglePin={handleTogglePin}
+            onReport={handleReportComment}
+          />
         </Paper>
+
+        <ReportDialog
+          isOpen={isPostReportOpen}
+          onClose={() => setIsPostReportOpen(false)}
+          onSubmit={handleReportPost}
+        />
       </Container>
     </Box>
   );
