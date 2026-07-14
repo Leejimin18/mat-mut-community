@@ -12,7 +12,6 @@ import Grid from '@mui/material/Grid';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/use-auth';
 import { uploadPostImages } from '../utils/upload-post-images';
-import StarRating from '../components/ui/star-rating';
 
 export default function PostWritePage() {
   const navigate = useNavigate();
@@ -26,8 +25,6 @@ export default function PostWritePage() {
   const [mainIngredient, setMainIngredient] = useState('');
   const [price, setPrice] = useState('');
   const [content, setContent] = useState('');
-  const [rating, setRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
   const [imageFiles, setImageFiles] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,16 +77,6 @@ export default function PostWritePage() {
         }));
         const { error: imageError } = await supabase.from('mm_post_images').insert(imageRows);
         if (imageError) throw imageError;
-      }
-
-      if (reviewComment) {
-        const { error: commentError } = await supabase.from('mm_comments').insert({
-          post_id: post.post_id,
-          user_id: user.id,
-          content: reviewComment,
-          rating,
-        });
-        if (commentError) throw commentError;
       }
 
       navigate(`/posts/${post.post_id}`);
@@ -183,17 +170,6 @@ export default function PostWritePage() {
                 선택된 이미지 {imageFiles.length}장
               </Typography>
             )}
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="body2">내 평점</Typography>
-              <StarRating value={rating} onChange={setRating} isReadOnly={false} />
-            </Box>
-            <TextField
-              label="한 줄 평"
-              value={reviewComment}
-              onChange={(event) => setReviewComment(event.target.value)}
-              fullWidth
-            />
 
             <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
               등록하기
