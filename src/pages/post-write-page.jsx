@@ -12,6 +12,7 @@ import Grid from '@mui/material/Grid';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/use-auth';
 import { uploadPostImages } from '../utils/upload-post-images';
+import StarRating from '../components/ui/star-rating';
 
 export default function PostWritePage() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function PostWritePage() {
   const [mainIngredient, setMainIngredient] = useState('');
   const [price, setPrice] = useState('');
   const [content, setContent] = useState('');
+  const [authorRating, setAuthorRating] = useState(5);
   const [imageFiles, setImageFiles] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,6 +64,7 @@ export default function PostWritePage() {
           main_ingredient: mainIngredient,
           price: price ? Number(price) : null,
           content,
+          author_rating: authorRating,
         })
         .select()
         .single();
@@ -154,6 +157,11 @@ export default function PostWritePage() {
               multiline
               minRows={5}
             />
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2">내 평점</Typography>
+              <StarRating value={authorRating} onChange={setAuthorRating} isReadOnly={false} />
+            </Box>
 
             <Button variant="outlined" component="label">
               이미지 첨부 (다중 선택 가능)

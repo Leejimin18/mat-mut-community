@@ -22,6 +22,7 @@ export default function PostCard({ post }) {
   const thumbnailUrl =
     [...(post.mm_post_images ?? [])].sort((a, b) => a.sort_order - b.sort_order)[0]?.image_url ?? FALLBACK_IMAGE;
   const commentCount = post.mm_comments?.[0]?.count ?? 0;
+  const displayRating = commentCount > 0 ? Number(post.avg_rating) : Number(post.author_rating ?? 0);
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -41,7 +42,7 @@ export default function PostCard({ post }) {
             {post.main_ingredient} · {post.price ? `${post.price.toLocaleString()}원` : '가격 정보 없음'}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
-            <StarRating value={Number(post.avg_rating)} isReadOnly />
+            <StarRating value={displayRating} isReadOnly />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
               <Box component="span" sx={{ fontSize: '0.9rem' }}>💬</Box>
               <Typography variant="body2">{commentCount}</Typography>

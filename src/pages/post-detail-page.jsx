@@ -184,12 +184,23 @@ export default function PostDetailPage() {
             {post.main_ingredient} · {post.price ? `${post.price.toLocaleString()}원` : '가격 정보 없음'}
           </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+            <Typography variant="body2" color="text.secondary">
+              평균 평점
+            </Typography>
             <StarRating value={Number(post.avg_rating)} isReadOnly />
             <Typography variant="body2" color="text.secondary">
               {post.mm_users?.nickname ?? '익명'} · {formatDate(post.created_at)} · 조회 {post.view_count}
             </Typography>
           </Box>
+          {post.author_rating != null && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+              <Typography variant="body2" color="text.secondary">
+                작성자 평점
+              </Typography>
+              <StarRating value={post.author_rating} isReadOnly />
+            </Box>
+          )}
 
           {images.length > 0 && (
             <ImageList cols={images.length > 1 ? 3 : 1} gap={8} sx={{ mt: 2 }}>
